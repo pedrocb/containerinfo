@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Container struct {
@@ -33,11 +34,30 @@ func initializeClientSet() (*kubernetes.Clientset, error) {
 }
 
 func ContainerResourcesHandler(w http.ResponseWriter, r *http.Request, clientset *kubernetes.Clientset) {
-	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
-	containers := []Container{}
+	// Build label selector
+	podLabelParams := r.URL.Query()["pod-label"]
+	var labelSelector strings.Builder
+	// len(podLabelParams) > 1 if there are multiple "pod-label" params e.g /container-resources?pod-label=foo=bar&pod-label=bar=foo
+	// The behaviour, in that scenario, is the same as both were sent on the same param i.e /container-resources?pod-label=foo=bar,bar=foo
+	if len(podLabelParams) > 0 {
+		for index, filter := range podLabelParams {
+			if index != 0 {
+				labelSelector.WriteByte(',')
+			}
+			labelSelector.WriteString(filter)
+		}
+	}
+
+	// List pods on cluster
+	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		LabelSelector: labelSelector.String(),
+	})
 	if err != nil {
 		panic(err.Error())
 	}
+
+	// Build response
+	containers := []Container{}
 	for _, currentPod := range pods.Items {
 		for _, podContainer := range currentPod.Spec.Containers {
 			containers = append(containers, Container{
