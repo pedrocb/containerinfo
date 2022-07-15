@@ -36,21 +36,12 @@ func initializeClientSet() (*kubernetes.Clientset, error) {
 func ContainerResourcesHandler(w http.ResponseWriter, r *http.Request, clientset *kubernetes.Clientset) {
 	// Build label selector
 	podLabelParams := r.URL.Query()["pod-label"]
-	var labelSelector strings.Builder
-	// len(podLabelParams) > 1 if there are multiple "pod-label" params e.g /container-resources?pod-label=foo=bar&pod-label=bar=foo
-	// The behaviour, in that scenario, is the same as both were sent on the same param i.e /container-resources?pod-label=foo=bar,bar=foo
-	if len(podLabelParams) > 0 {
-		for index, filter := range podLabelParams {
-			if index != 0 {
-				labelSelector.WriteByte(',')
-			}
-			labelSelector.WriteString(filter)
-		}
-	}
+	// If len(podlabelparams) > 1 e.g /container-resources?pod-label=foo=bar&pod-label=bar=foo, simple join all the params
+	labelSelector := strings.Join(podLabelParams, ",")
 
 	// List pods on cluster
 	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
-		LabelSelector: labelSelector.String(),
+		LabelSelector: labelSelector,
 	})
 	if err != nil {
 		panic(err.Error())
