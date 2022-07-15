@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: containerinfo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: containerinfo
+  template:
+    metadata:
+      labels:
+        app: containerinfo
+    spec:
+      containers:
+        - name: containerinfo
+          image: containerinfo
+      serviceAccountName: containerinfo
