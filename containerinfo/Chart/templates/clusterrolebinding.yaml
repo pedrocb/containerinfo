@@ -1,0 +1,12 @@
+{{- if .Values.clusterRoleBinding.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.clusterRoleBinding.name | default (include "containerinfo.fullname" .)}}
+  labels:
+    {{- include "containerinfo.labels" . | nindent 4 }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.clusterRole.name | default (include "containerinfo.fullname" .)}}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
