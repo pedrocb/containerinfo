@@ -5,6 +5,10 @@ metadata:
   name: {{ .Values.clusterRoleBinding.name | default (include "containerinfo.fullname" .)}}
   labels:
     {{- include "containerinfo.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "containerinfo.serviceAccountName" .}}
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Values.clusterRole.name | default (include "containerinfo.fullname" .)}}
