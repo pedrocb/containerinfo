@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -73,6 +74,10 @@ func main() {
 
 	http.HandleFunc("/container-resources", func(w http.ResponseWriter, r *http.Request) {
 		ContainerResourcesHandler(w, r, clientSet)
+	})
+
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Healthy")
 	})
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
