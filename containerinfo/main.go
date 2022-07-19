@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -23,6 +22,7 @@ type Container struct {
 }
 
 func initializeClientSet() (*kubernetes.Clientset, error) {
+	// Initialize client to interact with kubernetes API
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -45,7 +45,9 @@ func ContainerResourcesHandler(w http.ResponseWriter, r *http.Request, clientset
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
-		panic(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatal("Error listing pods")
+		return
 	}
 
 	// Build response
@@ -67,9 +69,10 @@ func ContainerResourcesHandler(w http.ResponseWriter, r *http.Request, clientset
 }
 
 func main() {
-	clientSet, err := initializeClientSet()
+	clientset, err := initializeClientSet()
 	if err != nil {
 		log.Fatal("Error initializing kubernetes config")
+		return
 	}
 
 	http.HandleFunc("/container-resources", func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +80,7 @@ func main() {
 	})
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Healthy")
+		json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
 	})
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
