@@ -69,7 +69,7 @@ func ContainerResourcesHandler(w http.ResponseWriter, r *http.Request, clientset
 }
 
 func main() {
-	clientset, err := initializeClientSet()
+	clientSet, err := initializeClientSet()
 	if err != nil {
 		log.Fatal("Error initializing kubernetes config")
 		return
