@@ -8,7 +8,7 @@ This repository contains the source code for the service (with kubernetes manife
 To install the service on a kubernetes cluster use helm.
 
 ```
-helm install containerinfo containerinfo/Chart
+helm install containerinfo Chart
 ```
 
 ## Values
@@ -46,7 +46,7 @@ Having the service installed on a kubernetes cluster, it can be used from inside
 #### Example with default values
 ```
 kubectl create -n my-home-assignment
-helm install -n my-home-assignment containerinfo containerinfo/Chart
+helm install -n my-home-assignment containerinfo Chart
 
 kubectl run --restart Never --image buildpack-deps:curl --rm -ti curl --command -- curl "containerinfo.my-home-assignment.svc.cluster.local:8000/container-resources?pod-label=app.kubernetes.io/instance=containerinfo"
 ```
